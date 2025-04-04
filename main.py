@@ -74,31 +74,25 @@ async def simplify_text(req: SimplifyRequest):
 # 정적 파일 (프론트엔드 build된 결과) 경로 설정
 frontend_path = Path(__file__).parent / "frontend" / "dist"
 
-# 정적 파일 제공을 위한 StaticFiles 마운트
-app.mount("/static", StaticFiles(directory=str(frontend_path / "static")), name="static")
-app.mount("/assets", StaticFiles(directory=str(frontend_path / "assets")), name="assets")
+# 정적 파일 디렉토리 마운트 - 디렉토리가 존재할 경우에만
+static_dir = frontend_path / "static"
+if static_dir.exists() and static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-# 루트 경로 처리 추가
+# 루트 경로 및 그 외 모든 경로 처리 (SPA용)
 @app.get("/")
-async def serve_root():
-    index_path = frontend_path / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path)
-    return JSONResponse(status_code=404, content={"message": "index.html not found"})
-
-# 프론트엔드 라우팅 지원 (SPA용)
 @app.get("/{full_path:path}")
-async def serve_spa(full_path: str):
-    # API 경로는 무시
-    if full_path.startswith("api/"):
+async def serve_spa(full_path: str = ""):
+    # API 경로는 별도 처리
+    if full_path.startswith("api/") and full_path != "api/simplify":
         return JSONResponse(status_code=404, content={"message": "API not found"})
-        
-    # 정적 파일 경로 확인
-    file_path = frontend_path / full_path
-    if file_path.is_file():
-        return FileResponse(file_path)
     
-    # 그 외의 경로는 index.html 반환
+    # 먼저 요청된 파일이 실제로 존재하는지 확인
+    requested_path = frontend_path / full_path
+    if requested_path.is_file():
+        return FileResponse(requested_path)
+    
+    # 그 외의 경로는 index.html 반환 (SPA 라우팅 지원)
     index_path = frontend_path / "index.html"
     if index_path.exists():
         return FileResponse(index_path)

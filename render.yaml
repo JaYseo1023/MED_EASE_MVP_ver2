@@ -2,7 +2,7 @@ services:
   - type: web
     name: med-ease
     env: python
-    buildCommand: pip install -r requirements.txt && cd frontend && npm install && npm run build && cd ..
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
