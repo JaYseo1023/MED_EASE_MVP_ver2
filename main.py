@@ -74,6 +74,18 @@ async def simplify_text(req: SimplifyRequest):
 # 정적 파일 (프론트엔드 build된 결과) 경로 설정
 frontend_path = Path(__file__).parent / "frontend" / "dist"
 
+# 정적 파일 제공을 위한 StaticFiles 마운트
+app.mount("/static", StaticFiles(directory=str(frontend_path / "static")), name="static")
+app.mount("/assets", StaticFiles(directory=str(frontend_path / "assets")), name="assets")
+
+# 루트 경로 처리 추가
+@app.get("/")
+async def serve_root():
+    index_path = frontend_path / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return JSONResponse(status_code=404, content={"message": "index.html not found"})
+
 # 프론트엔드 라우팅 지원 (SPA용)
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
