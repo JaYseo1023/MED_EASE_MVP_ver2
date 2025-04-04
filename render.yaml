@@ -2,10 +2,10 @@ services:
   - type: web
     name: med-ease
     env: python
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
         sync: false  # 민감한 정보이므로 Render 대시보드에서 직접 설정
       - key: NODE_VERSION
-        value: 18.18.0 
+        value: 16.20.0 
