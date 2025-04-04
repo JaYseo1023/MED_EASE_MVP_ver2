@@ -6,8 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 import json
 import os
+import logging
 from dotenv import load_dotenv
 from pathlib import Path
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -72,12 +77,38 @@ async def simplify_text(req: SimplifyRequest):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 # 정적 파일 (프론트엔드 build된 결과) 경로 설정
+# 일반적인 경로 시도
 frontend_path = Path(__file__).parent / "frontend" / "dist"
+logger.info(f"기본 프론트엔드 경로: {frontend_path}")
+logger.info(f"기본 프론트엔드 경로 존재 여부: {frontend_path.exists()}")
+
+# 경로가 없으면 대체 경로 시도
+if not frontend_path.exists():
+    # Render 배포 환경에서 가능한 대체 경로들
+    alternative_paths = [
+        Path("/opt/render/project/src/frontend/dist"),
+        Path(__file__).parent.parent / "frontend" / "dist",
+        Path(__file__).parent / "dist",
+    ]
+    
+    for alt_path in alternative_paths:
+        logger.info(f"대체 경로 시도: {alt_path}")
+        if alt_path.exists():
+            logger.info(f"유효한 대체 경로 발견: {alt_path}")
+            frontend_path = alt_path
+            break
+    
+    logger.info(f"최종 선택된 프론트엔드 경로: {frontend_path}")
+    logger.info(f"최종 경로 존재 여부: {frontend_path.exists()}")
 
 # 정적 파일 디렉토리 마운트 - 디렉토리가 존재할 경우에만
 static_dir = frontend_path / "static"
+logger.info(f"정적 파일 경로: {static_dir}")
+logger.info(f"정적 파일 경로 존재 여부: {static_dir.exists()}")
+
 if static_dir.exists() and static_dir.is_dir():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+    logger.info("정적 파일 디렉토리가 성공적으로 마운트되었습니다.")
 
 # 루트 경로 및 그 외 모든 경로 처리 (SPA용)
 @app.get("/")
@@ -94,7 +125,12 @@ async def serve_spa(full_path: str = ""):
     
     # 그 외의 경로는 index.html 반환 (SPA 라우팅 지원)
     index_path = frontend_path / "index.html"
+    logger.info(f"index.html 경로: {index_path}")
+    logger.info(f"index.html 존재 여부: {index_path.exists()}")
+    
     if index_path.exists():
+        logger.info("index.html 파일을 반환합니다.")
         return FileResponse(index_path)
     
+    logger.error(f"index.html 파일을 찾을 수 없습니다. 경로: {index_path}")
     return JSONResponse(status_code=404, content={"message": "index.html not found"})

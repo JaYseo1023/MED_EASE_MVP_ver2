@@ -13,6 +13,11 @@ npm install
 NODE_OPTIONS=--openssl-legacy-provider npx tsc
 NODE_OPTIONS=--openssl-legacy-provider npx vite build
 
+# 빌드 결과물 확인
+echo "프론트엔드 빌드 결과물 확인:"
+ls -la dist/
+ls -la dist/static/
+
 # 루트 디렉토리로 돌아가기
 cd ..
 
