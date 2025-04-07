@@ -153,7 +153,7 @@ function App() {
                     <svg className="w-4 h-4 text-gray-400 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>의학 용어를 쉽게 바꿔 드립니다</span>
+                    <span>어려운 정보를 쉽게 바꿔 드립니다</span>
                   </div>
                   <label htmlFor="input-text" className="sr-only">텍스트 입력</label>
                 </div>
