@@ -34,7 +34,7 @@ class SimplifyRequest(BaseModel):
 @app.post("/api/simplify")
 async def simplify_text(req: SimplifyRequest):
     request_data = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-4o",
         "messages": [
             {
                 "role": "user",
@@ -42,7 +42,8 @@ async def simplify_text(req: SimplifyRequest):
 
 아래 조건을 지켜 주세요:
 
-- 핵심 개념과 의학적 의미를 유지해 주세요.
+- 내용이 누락되지 않도록 원문의 모든 부분을 전부 설명해 주세요. 
+- 핵심 개념과 의학적 의미를 유지하며 잘 풀어 설명해 주세요.
 - 전문 용어나 생소한 표현은 가능한 한 쉽게 풀어 쓰고, 의미 전달이 중요한 경우에는 짧은 설명을 덧붙여 주세요.
 - 필요한 경우 간단한 예시나 쉬운 비유를 사용해 이해를 도와 주세요. 단, 전체 흐름을 해치지 않도록 균형 있게 사용해 주세요.
 - 자연스럽게 받아들일 수 있는 어조로, 의료인이 설명하듯 친절하고 차분하게 작성해 주세요.

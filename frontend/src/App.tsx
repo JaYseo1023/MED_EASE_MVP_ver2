@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 
 const exampleTexts = {
@@ -52,6 +52,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showAlert, setShowAlert] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   
   const MAX_CHARS = 1000
 
@@ -111,7 +113,22 @@ function App() {
 
   const handleExampleClick = (key: keyof typeof exampleTexts) => {
     setInputText(exampleTexts[key])
+    setDropdownOpen(false)
   }
+  
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -128,53 +145,72 @@ function App() {
         <div className="bg-white shadow-xl rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <div className="flex flex-col mb-2">
+              <div className="mb-2">
                 <div className="flex justify-between items-center">
                   <label htmlFor="input-text" className="block text-sm font-medium text-gray-700">
                     쉽게 바꾸고 싶은 내용을 입력하세요
                   </label>
-                </div>
-                <div className="flex justify-between items-center mt-2">
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleExampleClick('somzz')}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Somzz 설명
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleExampleClick('covid')}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      코로나19 설명
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleExampleClick('hypertension')}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      고혈압 설명
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleExampleClick('diabetes')}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      당뇨병 설명
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleExampleClick('nicojini')}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Dr.Jin Nicojini 설명
-                    </button>
+                  
+                  <div className="flex items-center space-x-2">
+                    <div className="relative" ref={dropdownRef}>
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                      >
+                        <span>예시</span>
+                        <svg className="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      
+                      {dropdownOpen && (
+                        <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                          <div className="py-1">
+                            <button
+                              type="button"
+                              onClick={() => handleExampleClick('somzz')}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                            >
+                              Somzz 설명
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleExampleClick('covid')}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                            >
+                              코로나19 설명
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleExampleClick('hypertension')}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                            >
+                              고혈압 설명
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleExampleClick('diabetes')}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                            >
+                              당뇨병 설명
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleExampleClick('nicojini')}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                            >
+                              Dr.Jin Nicojini 설명
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <span className={`text-sm ${inputText.length > MAX_CHARS ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                      {inputText.length}/{MAX_CHARS}자
+                    </span>
                   </div>
-                  <span className={`text-sm ${inputText.length > MAX_CHARS ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
-                    {inputText.length}/{MAX_CHARS}자
-                  </span>
                 </div>
               </div>
               <textarea
